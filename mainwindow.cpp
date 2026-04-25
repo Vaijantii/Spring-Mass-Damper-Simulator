@@ -533,14 +533,14 @@ void MainWindow::onExportClicked()
 
             msgBox.exec(); });
 }
-// ── FRF ───────────────────────────────────────────────────────────────────────
+// FRF
 void MainWindow::onFrfClicked()
 {
     QString workDir = QDir::currentPath();
     QString csvPath = workDir + "/H_output.csv";
     QString matPath = workDir + "/matrix.txt";
 
-    // ── Helper: parse CSV and open plot dialog ────────────────────────────
+    // Helper: parse CSV and open plot dialog
     auto openFrfDialog = [this, csvPath]()
     {
         // 1. Read header to discover available DOFs
@@ -1060,13 +1060,13 @@ void MainWindow::onFrfClicked()
         plotDlg->show();
     };
 
-    // ── If CSV already exists, skip solver ───────────────────────────────
+    // If CSV already exists, skip solver
     if (QFile::exists(csvPath))
     {
         QFile::remove(csvPath);
     }
 
-    // ── First run: need matrix.txt present ───────────────────────────────
+    // First run: need matrix.txt present
     if (!QFile::exists(matPath))
     {
         QMessageBox::warning(this, "FRF Error",
@@ -1152,7 +1152,7 @@ MainWindow::parseSensitivitySummary(const QString &summaryPath)
     return params;
 }
 
-// ── parseSensitivityFreqCurves ───────────────────────────────────────────────
+// parseSensitivityFreqCurves
 void MainWindow::parseSensitivityFreqCurves(const QString &freqPath,
                                             QVector<SensParam> &params,
                                             QVector<double> &omegas)
@@ -1190,7 +1190,7 @@ void MainWindow::parseSensitivityFreqCurves(const QString &freqPath,
     }
 }
 
-// ── openSensitivityDialog ────────────────────────────────────────────────────
+// openSensitivityDialog
 void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
                                        const QVector<double> &omegas)
 {
@@ -1200,7 +1200,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         return;
     }
 
-    // ── colour helpers ───────────────────────────────────────────────────────
+    // colour helpers
     // Sensitivity tier thresholds (relative to max)
     double maxMean = params.first().mean; // already sorted descending
     auto tierColor = [&](double v) -> QColor
@@ -1221,7 +1221,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         return QColor("#f9e2af");     // amber – M
     };
 
-    // ── master dialog ────────────────────────────────────────────────────────
+    //  master dialog
     QDialog *dlg = new QDialog(this);
     dlg->setWindowTitle("Sensitivity Analysis Results");
     dlg->resize(1050, 620);
@@ -1241,16 +1241,16 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
     QTabWidget *tabs = new QTabWidget(dlg);
     mainLay->addWidget(tabs);
 
-    // ════════════════════════════════════════════════════════════════════════
+    // ------------------------------------------------------------------------------
     // TAB 1 — BAR CHART  (horizontal, styled like the screenshot)
-    // ════════════════════════════════════════════════════════════════════════
+    // ------------------------------------------------------------------------------
     {
         QWidget *tab1 = new QWidget();
         QVBoxLayout *lay = new QVBoxLayout(tab1);
         lay->setContentsMargins(12, 12, 12, 12);
         lay->setSpacing(6);
 
-        // ── title + legend row ───────────────────────────────────────────
+        // title + legend row
         QHBoxLayout *titleRow = new QHBoxLayout();
         QLabel *title = new QLabel("Parameter ranking  —  mean  ‖Sₚ‖F  over frequency");
         title->setStyleSheet("font-size:13px; font-weight:bold; color:#cdd6f4;");
@@ -1272,7 +1272,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         titleRow->addWidget(makeLeg("#f9e2af", "M  mass"));
         lay->addLayout(titleRow);
 
-        // ── bar rows (custom painted widget, no Qt Charts needed) ────────
+        // bar rows (custom painted widget, no Qt Charts needed)
         QScrollArea *scroll = new QScrollArea();
         scroll->setWidgetResizable(true);
         scroll->setFrameShape(QFrame::NoFrame);
@@ -1372,7 +1372,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         scroll->setWidget(barContainer);
         lay->addWidget(scroll, 1);
 
-        // ── tier legend ──────────────────────────────────────────────────
+        // tier legend
         QHBoxLayout *tierLeg = new QHBoxLayout();
         tierLeg->addStretch();
         auto makeTier = [](const QString &col, const QString &txt)
@@ -1395,16 +1395,16 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         tabs->addTab(tab1, "📊  Bar chart");
     }
 
-    // ════════════════════════════════════════════════════════════════════════
+    // ------------------------------------------------------------------------------
     // TAB 2 — SCENE OVERLAY  (color-coded list + live scene glow)
-    // ════════════════════════════════════════════════════════════════════════
+    // ------------------------------------------------------------------------------
     {
         QWidget *tab2 = new QWidget();
         QHBoxLayout *lay = new QHBoxLayout(tab2);
         lay->setContentsMargins(12, 12, 12, 12);
         lay->setSpacing(16);
 
-        // ── LEFT: colour key list ────────────────────────────────────────
+        // LEFT: colour key list
         QVBoxLayout *listLay = new QVBoxLayout();
 
         QLabel *lbl = new QLabel("Element sensitivity classification");
@@ -1453,7 +1453,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         listLay->addStretch();
         lay->addLayout(listLay, 1);
 
-        // ── RIGHT: colour key explanation ────────────────────────────────
+        // RIGHT: colour key explanation
         QVBoxLayout *keyLay = new QVBoxLayout();
         keyLay->setAlignment(Qt::AlignTop);
 
@@ -1493,9 +1493,9 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         scene->update(); // repaint scene with new colors
     }
 
-    // ════════════════════════════════════════════════════════════════════════
+    // ------------------------------------------------------------------------------
     // TAB 3 — FREQUENCY-DEPENDENT PLOT  (top 5 params, line chart)
-    // ════════════════════════════════════════════════════════════════════════
+    // ------------------------------------------------------------------------------
     {
         QWidget *tab3 = new QWidget();
         QVBoxLayout *lay = new QVBoxLayout(tab3);
@@ -1510,7 +1510,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
         }
         else
         {
-            // ── Line chart ──────────────────────────────────────────────
+            // Line chart
             QChart *chart = new QChart();
             chart->setBackgroundBrush(QColor("#1e1e2e"));
             chart->setPlotAreaBackgroundBrush(QColor("#181825"));
@@ -1581,7 +1581,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
             cv->setRenderHint(QPainter::Antialiasing);
             lay->addWidget(cv, 1);
 
-            // ── Custom legend ────────────────────────────────────────────
+            // Custom legend
             QHBoxLayout *legRow = new QHBoxLayout();
             legRow->addStretch();
             for (int pi = 0; pi < topN; ++pi)
@@ -1598,7 +1598,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
             legRow->addStretch();
             lay->addLayout(legRow);
 
-            // ── Explanation note ─────────────────────────────────────────
+            // Explanation note
             QLabel *note = new QLabel(
                 "Each curve shows ‖Sₚ(ω)‖F — how much H(ω) reacts to a 1% change in "
                 "parameter p at each frequency. Peaks near natural frequencies (ω₁, ω₂) "
@@ -1614,7 +1614,7 @@ void MainWindow::openSensitivityDialog(const QVector<SensParam> &params,
     dlg->show();
 }
 
-// ── onSensitivityClicked ─────────────────────────────────────────────────────
+// onSensitivityClicked
 void MainWindow::onSensitivityClicked()
 {
     QString workDir = QDir::currentPath();

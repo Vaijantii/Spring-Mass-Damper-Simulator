@@ -16,10 +16,10 @@
 #include <cmath>
 #include <limits>
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Inline preview plot — draws F(t) over [0, tMax]
-    // ─────────────────────────────────────────────────────────────────────────────
-    class PreviewPlot : public QWidget
+// ------------------------------------------------------------------------------
+// Inline preview plot — draws F(t) over [0, tMax]
+// ------------------------------------------------------------------------------
+class PreviewPlot : public QWidget
 {
 public:
     explicit PreviewPlot(QWidget *parent = nullptr) : QWidget(parent)
@@ -31,12 +31,19 @@ public:
 
     void setData(const QVector<double> &t, const QVector<double> &f)
     {
-        m_t = t; m_f = f;
+        m_t = t;
+        m_f = f;
         update();
     }
 
-    void setError(const QString &err) { m_error = err; m_t.clear(); m_f.clear(); update(); }
-    void clearError()                 { m_error.clear(); }
+    void setError(const QString &err)
+    {
+        m_error = err;
+        m_t.clear();
+        m_f.clear();
+        update();
+    }
+    void clearError() { m_error.clear(); }
 
 protected:
     void paintEvent(QPaintEvent *) override
@@ -51,14 +58,16 @@ protected:
         p.setPen(QPen(QColor("#45475a"), 1));
         p.drawRect(plot);
 
-        if (!m_error.isEmpty()) {
+        if (!m_error.isEmpty())
+        {
             p.setPen(QColor("#f38ba8"));
             p.setFont(QFont("Arial", 9));
             p.drawText(plot, Qt::AlignCenter | Qt::TextWordWrap, m_error);
             return;
         }
 
-        if (m_t.size() < 2) {
+        if (m_t.size() < 2)
+        {
             p.setPen(QColor("#6c7086"));
             p.setFont(QFont("Arial", 9));
             p.drawText(plot, Qt::AlignCenter, "Press Preview to plot");
@@ -68,18 +77,25 @@ protected:
         // Find data range
         double fMin = *std::min_element(m_f.begin(), m_f.end());
         double fMax = *std::max_element(m_f.begin(), m_f.end());
-        if (fMax == fMin) { fMax += 1.0; fMin -= 1.0; }
+        if (fMax == fMin)
+        {
+            fMax += 1.0;
+            fMin -= 1.0;
+        }
         double tMin = m_t.first(), tMax = m_t.last();
 
-        auto mapX = [&](double t) -> double {
+        auto mapX = [&](double t) -> double
+        {
             return plot.left() + (t - tMin) / (tMax - tMin) * plot.width();
         };
-        auto mapY = [&](double f) -> double {
+        auto mapY = [&](double f) -> double
+        {
             return plot.bottom() - (f - fMin) / (fMax - fMin) * plot.height();
         };
 
         // Zero line
-        if (fMin < 0 && fMax > 0) {
+        if (fMin < 0 && fMax > 0)
+        {
             p.setPen(QPen(QColor("#45475a"), 1, Qt::DashLine));
             double y0 = mapY(0);
             p.drawLine(QPointF(plot.left(), y0), QPointF(plot.right(), y0));
@@ -117,12 +133,12 @@ protected:
 
 private:
     QVector<double> m_t, m_f;
-    QString         m_error;
+    QString m_error;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ------------------------------------------------------------------------------
 // ForceDialog
-// ─────────────────────────────────────────────────────────────────────────────
+// ------------------------------------------------------------------------------
 ForceDialog::ForceDialog(const ForceFunction &current, QWidget *parent)
     : QDialog(parent)
 {
@@ -132,7 +148,7 @@ ForceDialog::ForceDialog(const ForceFunction &current, QWidget *parent)
     QVBoxLayout *root = new QVBoxLayout(this);
     root->setSpacing(10);
 
-    // ── Expression hints ──────────────────────────────────────────────────
+    //  Expression hints -------------------------------------------------------
     QLabel *hint = new QLabel(
         "<b>Available variables:</b> &nbsp; <tt>t</tt> (time, s) &nbsp; "
         "<tt>w</tt> (ω, rad/s) &nbsp; <tt>pi</tt> &nbsp; <tt>e</tt><br>"
@@ -144,7 +160,7 @@ ForceDialog::ForceDialog(const ForceFunction &current, QWidget *parent)
                         "background:#181825; padding:6px; border-radius:4px;");
     root->addWidget(hint);
 
-    // ── Parameters form ───────────────────────────────────────────────────
+    // Parameters form /---------------------------------------------------------------
     QFormLayout *form = new QFormLayout;
     form->setSpacing(6);
 
@@ -181,14 +197,14 @@ ForceDialog::ForceDialog(const ForceFunction &current, QWidget *parent)
 
     root->addLayout(form);
 
-    // ── Error label ───────────────────────────────────────────────────────
+    // Error label ------------------------------------------------
     m_errorLabel = new QLabel;
     m_errorLabel->setStyleSheet("color:#f38ba8; font-size:11px;");
     m_errorLabel->setWordWrap(true);
     m_errorLabel->hide();
     root->addWidget(m_errorLabel);
 
-    // ── Preview button + plot ─────────────────────────────────────────────
+    //  Preview button + plot  --------------------------------------
     QPushButton *previewBtn = new QPushButton("▶  Preview");
     previewBtn->setFixedHeight(28);
     root->addWidget(previewBtn);
@@ -196,27 +212,29 @@ ForceDialog::ForceDialog(const ForceFunction &current, QWidget *parent)
     m_plot = new PreviewPlot(this);
     root->addWidget(m_plot);
 
-    // ── OK / Cancel ───────────────────────────────────────────────────────
+    // OK / Cancel -------------------------------------------------
     QDialogButtonBox *btns = new QDialogButtonBox(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     root->addWidget(btns);
 
     connect(previewBtn, &QPushButton::clicked, this, &ForceDialog::onPreview);
-    connect(btns,       &QDialogButtonBox::accepted, this, &ForceDialog::onAccept);
-    connect(btns,       &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(btns, &QDialogButtonBox::accepted, this, &ForceDialog::onAccept);
+    connect(btns, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     // Auto-preview existing expression on open
-    if (!current.isEmpty()) onPreview();
+    if (!current.isEmpty())
+        onPreview();
 }
 
 void ForceDialog::onPreview()
 {
-    const QString expr  = m_exprEdit->text().trimmed();
-    const double  omega = m_omegaSpin->value();
-    const double  tMax  = m_tMaxSpin->value();
+    const QString expr = m_exprEdit->text().trimmed();
+    const double omega = m_omegaSpin->value();
+    const double tMax = m_tMaxSpin->value();
 
     QString err = ForceFunction::validate(expr, omega);
-    if (!err.isEmpty()) {
+    if (!err.isEmpty())
+    {
         m_errorLabel->setText("Error: " + err);
         m_errorLabel->show();
         m_plot->setError("Invalid expression:\n" + err);
@@ -226,9 +244,10 @@ void ForceDialog::onPreview()
     m_plot->clearError();
 
     ForceFunction fn(expr, m_angleSpin->value(), omega);
-    const int     N  = 400;
+    const int N = 400;
     QVector<double> ts(N), fs(N);
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < N; ++i)
+    {
         double t = tMax * i / (N - 1);
         ts[i] = t;
         fs[i] = fn.evaluate(t);
@@ -238,14 +257,15 @@ void ForceDialog::onPreview()
 
 void ForceDialog::onAccept()
 {
-    const QString expr  = m_exprEdit->text().trimmed();
-    const double  omega = m_omegaSpin->value();
+    const QString expr = m_exprEdit->text().trimmed();
+    const double omega = m_omegaSpin->value();
 
     QString err = ForceFunction::validate(expr, omega);
-    if (!err.isEmpty()) {
+    if (!err.isEmpty())
+    {
         m_errorLabel->setText("Error: " + err);
         m_errorLabel->show();
-        return;   // don't close — let user fix it
+        return; // don't close — let user fix it
     }
 
     m_result = ForceFunction(expr, m_angleSpin->value(), omega);

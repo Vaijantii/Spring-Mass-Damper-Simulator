@@ -84,7 +84,7 @@ static char askSeriesOrParallel(const QString &sym)
 
 void SimulationScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    // ── Force mode ────────────────────────────────────────────────────────
+    // Force mode
     if (m_mode == InteractionMode::AddForce)
     {
         QGraphicsItem *raw = itemAt(event->scenePos(), QTransform());
@@ -105,7 +105,7 @@ void SimulationScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    // ── Spring / Damper mode ─────────────────────────────────────────────
+    // Spring / Damper mode
     if (m_mode == InteractionMode::AddSpring ||
         m_mode == InteractionMode::AddDamper)
     {

@@ -18,7 +18,7 @@ WallItem::WallItem(WallType type, qreal size, QGraphicsItem *parent)
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
-// ── Bounding rect ────────────────────────────────────────────────────────────
+// Bounding rect
 QRectF WallItem::boundingRect() const
 {
     switch (m_type) {
@@ -34,7 +34,7 @@ QRectF WallItem::boundingRect() const
     return {};
 }
 
-// ── itemChange: notify springs/dampers when moved ────────────────────────────
+// itemChange: notify springs/dampers when moved
 QVariant WallItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemPositionHasChanged && scene()) {
@@ -49,14 +49,14 @@ QVariant WallItem::itemChange(GraphicsItemChange change, const QVariant &value)
     return QGraphicsItem::itemChange(change, value);
 }
 
-// ── Highlighted setter ───────────────────────────────────────────────────────
+// Highlighted setter
 void WallItem::setHighlighted(bool on)
 {
     m_highlighted = on;
     update();
 }
 
-// ── Paint dispatch ───────────────────────────────────────────────────────────
+// Paint dispatch
 void WallItem::paint(QPainter *painter,
                      const QStyleOptionGraphicsItem *,
                      QWidget *)
@@ -68,7 +68,7 @@ void WallItem::paint(QPainter *painter,
     }
 }
 
-// ── Vertical wall  (original look, hatches lean right) ───────────────────────
+// Vertical wall  (original look, hatches lean right)
 void WallItem::paintVertical(QPainter *painter) const
 {
     QRectF r = boundingRect();
@@ -93,7 +93,7 @@ void WallItem::paintVertical(QPainter *painter) const
     painter->drawText(r, Qt::AlignCenter, "W");
 }
 
-// ── Horizontal wall  (rotated version: hatches lean downward) ────────────────
+// Horizontal wall  (rotated version: hatches lean downward)
 void WallItem::paintHorizontal(QPainter *painter) const
 {
     QRectF r = boundingRect();
@@ -117,7 +117,7 @@ void WallItem::paintHorizontal(QPainter *painter) const
     painter->drawText(r, Qt::AlignCenter, "W");
 }
 
-// ── Ground  (wider slab, heavier hatches, ground symbol below) ───────────────
+// Ground  (wider slab, heavier hatches, ground symbol below)
 void WallItem::paintGround(QPainter *painter) const
 {
     QRectF r = boundingRect();

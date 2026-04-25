@@ -7,10 +7,11 @@
 class WallItem : public QGraphicsItem
 {
 public:
-    enum class WallType {
-        Vertical,    // original: thin vertical slab, hatches go right
-        Horizontal,  // thin horizontal slab, hatches go down
-        Ground       // wide horizontal base, hatches go down (fixed floor)
+    enum class WallType
+    {
+        Vertical,   // original: thin vertical slab, hatches go right
+        Horizontal, // thin horizontal slab, hatches go down
+        Ground      // wide horizontal base, hatches go down (fixed floor)
     };
 
     // 'size' means height for Vertical, width for Horizontal/Ground
@@ -19,11 +20,11 @@ public:
                       QGraphicsItem *parent = nullptr);
 
     QRectF boundingRect() const override;
-    void   paint(QPainter *painter,
+    void paint(QPainter *painter,
                const QStyleOptionGraphicsItem *option,
                QWidget *widget) override;
 
-    void     setHighlighted(bool on);
+    void setHighlighted(bool on);
     WallType wallType() const { return m_type; }
 
 protected:
@@ -31,13 +32,13 @@ protected:
 
 private:
     WallType m_type;
-    qreal    m_size;          // height (Vertical) or width (Horizontal/Ground)
-    qreal    m_thickness;     // the thin dimension
-    bool     m_highlighted = false;
+    qreal m_size;      // height (Vertical) or width (Horizontal/Ground)
+    qreal m_thickness; // the thin dimension
+    bool m_highlighted = false;
 
-    void paintVertical  (QPainter *p) const;
+    void paintVertical(QPainter *p) const;
     void paintHorizontal(QPainter *p) const;
-    void paintGround    (QPainter *p) const;
+    void paintGround(QPainter *p) const;
 };
 
 #endif

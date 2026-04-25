@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                 for (int j = 0; j < n; j++)
                 {
                     double mj = sqrt(M[j][j] + 1e-15);
-                    double val = Eigenvectors[j][col] / mj; // convert back
+                    double val = Eigenvectors[j][col] / mj;
                     fout_modes << "," << val / (max_val + 1e-15);
                 }
                 fout_modes << "\n";

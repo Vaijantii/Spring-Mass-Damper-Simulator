@@ -43,9 +43,9 @@ typedef complex<double> cd;
 typedef vector<vector<cd>> CMatrix;
 typedef vector<cd> CVector;
 
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Data structures
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 struct MassParam
 {
@@ -70,9 +70,9 @@ struct PhysicalParams
     vector<ConnectorParam> dampers;
 };
 
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Parse physical_params.txt
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 PhysicalParams readPhysicalParams(const string &filename)
 {
@@ -154,9 +154,9 @@ PhysicalParams readPhysicalParams(const string &filename)
     return p;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Matrix assembly
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 // Add contribution of one connector (value v) between nodeA and nodeB.
 // nodeA or nodeB == -1 means that end is grounded (no DOF there).
@@ -200,9 +200,9 @@ Matrices buildMatrices(const PhysicalParams &p)
     return sys;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Natural frequencies
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 vector<double> readFrequencies(const string &filename)
 {
@@ -227,10 +227,9 @@ vector<double> readFrequencies(const string &filename)
     return freq;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // LU solve
-// ═══════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------------------------
 void LU_decompose(const CMatrix &A, CMatrix &L, CMatrix &U, int n)
 {
     for (int i = 0; i < n; i++)
@@ -288,7 +287,6 @@ CMatrix computeH(const vector<vector<double>> &M,
                  const vector<vector<double>> &C,
                  double omega, int n)
 {
-    // D = -ω²M + jωC + K
     CMatrix D(n, vector<cd>(n));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
@@ -310,7 +308,6 @@ CMatrix computeH(const vector<vector<double>> &M,
     return H;
 }
 
-// ||(Hp – H0) / delta||_F
 double sensitivityNorm(const CMatrix &H0, const CMatrix &Hp, double delta, int n)
 {
     double norm2 = 0.0;
@@ -323,13 +320,13 @@ double sensitivityNorm(const CMatrix &H0, const CMatrix &Hp, double delta, int n
     return sqrt(norm2);
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // main
-// ═══════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 int main()
 {
-    // ── 1. Read physical parameters + connectivity ───────────────────────
+    // 1. Read physical parameters + connectivity
     PhysicalParams params = readPhysicalParams("physical_params.txt");
     if (params.n == 0)
     {
@@ -343,10 +340,10 @@ int main()
     cout << "Springs: " << params.springs.size() << "\n";
     cout << "Dampers: " << params.dampers.size() << "\n\n";
 
-    // ── 2. Build baseline M, K, C ────────────────────────────────────────
+    // 2. Build baseline M, K, C
     Matrices base = buildMatrices(params);
 
-    // ── 3. Frequency range ───────────────────────────────────────────────
+    //  3. Frequency range
     vector<double> omega_n = readFrequencies("natural_frequencies.csv");
     if (omega_n.empty())
     {
@@ -363,7 +360,7 @@ int main()
     for (int k = 0; k < N_freq; k++)
         omegas[k] = omega_min + (omega_max - omega_min) * k / (N_freq - 1);
 
-    // ── 4. Sensitivity sweep ─────────────────────────────────────────────
+    //  4. Sensitivity sweep
     const double DELTA_FRAC = 0.01; // 1% perturbation
 
     struct ParamResult
@@ -399,7 +396,7 @@ int main()
         return res;
     };
 
-    // ── Masses: perturb M[dof][dof] only ────────────────────────────────
+    // Masses: perturb M[dof][dof] only
     for (auto &mp : params.masses)
     {
         double delta = DELTA_FRAC * (fabs(mp.value) > 1e-12 ? fabs(mp.value) : 1.0);
@@ -408,7 +405,7 @@ int main()
         results.push_back(runParam(mp.name, M_p, base.K, base.C, delta));
     }
 
-    // ── Springs: perturb exactly the K entries this spring contributes ───
+    // Springs: perturb exactly the K entries this spring contributes
     for (auto &sp : params.springs)
     {
         double delta = DELTA_FRAC * (fabs(sp.value) > 1e-12 ? fabs(sp.value) : 1.0);
@@ -417,7 +414,7 @@ int main()
         results.push_back(runParam(sp.name, base.M, K_p, base.C, delta));
     }
 
-    // ── Dampers: perturb exactly the C entries this damper contributes ───
+    // Dampers: perturb exactly the C entries this damper contributes ───
     for (auto &dp : params.dampers)
     {
         double delta = DELTA_FRAC * (fabs(dp.value) > 1e-12 ? fabs(dp.value) : 1.0);
@@ -426,12 +423,12 @@ int main()
         results.push_back(runParam(dp.name, base.M, base.K, C_p, delta));
     }
 
-    // ── 5. Sort descending ───────────────────────────────────────────────
+    // 5. Sort descending
     sort(results.begin(), results.end(),
          [](const ParamResult &a, const ParamResult &b)
          { return a.meanSens > b.meanSens; });
 
-    // ── 6. sensitivity_output.csv ────────────────────────────────────────
+    // 6. sensitivity_output.csv
     {
         ofstream fout("sensitivity_output.csv");
         if (!fout.is_open())
@@ -448,7 +445,7 @@ int main()
         cout << "Saved sensitivity_output.csv\n";
     }
 
-    // ── 7. sensitivity_vs_freq.csv ───────────────────────────────────────
+    // 7. sensitivity_vs_freq.csv
     {
         ofstream fout("sensitivity_vs_freq.csv");
         if (!fout.is_open())
@@ -471,7 +468,7 @@ int main()
         cout << "Saved sensitivity_vs_freq.csv\n";
     }
 
-    // ── 8. Console summary ───────────────────────────────────────────────
+    // 8. Console summary
     cout << "\n=== Sensitivity Ranking ===\n";
     cout << left << setw(6) << "Rank"
          << setw(14) << "Parameter"
