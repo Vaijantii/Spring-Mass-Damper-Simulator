@@ -22,7 +22,7 @@ All source files are in the root of the repository (flat structure):
 mass-spring-simulator/
 ├── .vscode/                  ← VS Code workspace settings (not required by others)
 ├── CMakeLists.txt            ← CMake build file
-├── firstapp_en_IN.ts         ← Qt translation file
+├── spring_mass_damper_simulator_en_IN.ts         ← Qt translation file
 ├── README.md
 │
 ├── main.cpp
@@ -110,9 +110,9 @@ cmake --build build --config Release --parallel
 ## Running
 
 ```bash
-./build/firstapp               # Linux / macOS
-build\Release\firstapp.exe     # Windows (MSVC)
-build\firstapp.exe             # Windows (MinGW)
+./build/spring_mass_damper_simulator               # Linux / macOS
+build\Release\spring_mass_damper_simulator.exe     # Windows (MSVC)
+build\spring_mass_damper_simulator.exe             # Windows (MinGW)
 ```
 
 The three solver executables (`qr_solver`, `lu_solver`, `sensitivity_solver`) are built into the same `build/` folder as the GUI, so they will be found automatically.
